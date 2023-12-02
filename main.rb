@@ -63,3 +63,53 @@
 
 
 # # # Day 2
+limits = {
+    'blue' => 14,
+    'red' => 12,
+    'green' => 13
+}
+possible_games = []
+impossible_games = []
+file = File.open("day2.txt")
+
+file.each do |line|
+    game_id, subsets = line.split(': ')
+    game_id = game_id.gsub('Game ', '').to_i
+    possible = true
+    subsets.split(';').each do |subset|
+    next unless possible
+
+    subset.split(',').each do |colour_pair|
+        next unless possible
+
+        num, colour = colour_pair.split
+        if num.to_i > limits[colour]
+        possible = false
+        next
+        end
+    end
+    end
+    if possible
+    possible_games << game_id
+    else
+    impossible_games << game_id
+    end
+end
+# puts possible_games.sum
+
+powers = {}
+file = File.open("day2.txt")
+
+file.each do |line|
+game_id, subsets = line.split(': ')
+game_id = game_id.gsub('Game ', '').to_i
+values = {}
+subsets.split(';').each do |subset|
+    subset.split(',').each do |colour_pair|
+    num, colour = colour_pair.split
+    values[colour] = num.to_i if values[colour].nil? || num.to_i > values[colour]
+    end
+end
+powers[game_id] = values.values.inject(:*)
+end
+puts powers.values.sum
