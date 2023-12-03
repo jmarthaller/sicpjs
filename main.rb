@@ -63,53 +63,174 @@
 
 
 # # # Day 2
-limits = {
-    'blue' => 14,
-    'red' => 12,
-    'green' => 13
-}
-possible_games = []
-impossible_games = []
-file = File.open("day2.txt")
+# limits = {
+#     'blue' => 14,
+#     'red' => 12,
+#     'green' => 13
+# }
+# possible_games = []
+# impossible_games = []
+# file = File.open("day2.txt")
 
-file.each do |line|
-    game_id, subsets = line.split(': ')
-    game_id = game_id.gsub('Game ', '').to_i
-    possible = true
-    subsets.split(';').each do |subset|
-    next unless possible
+# file.each do |line|
+#     game_id, subsets = line.split(': ')
+#     game_id = game_id.gsub('Game ', '').to_i
+#     possible = true
+#     subsets.split(';').each do |subset|
+#     next unless possible
 
-    subset.split(',').each do |colour_pair|
-        next unless possible
+#     subset.split(',').each do |colour_pair|
+#         next unless possible
 
-        num, colour = colour_pair.split
-        if num.to_i > limits[colour]
-        possible = false
-        next
-        end
-    end
-    end
-    if possible
-    possible_games << game_id
-    else
-    impossible_games << game_id
-    end
-end
-# puts possible_games.sum
+#         num, colour = colour_pair.split
+#         if num.to_i > limits[colour]
+#         possible = false
+#         next
+#         end
+#     end
+#     end
+#     if possible
+#     possible_games << game_id
+#     else
+#     impossible_games << game_id
+#     end
+# end
+# # puts possible_games.sum
 
-powers = {}
-file = File.open("day2.txt")
+# powers = {}
+# file = File.open("day2.txt")
 
-file.each do |line|
-game_id, subsets = line.split(': ')
-game_id = game_id.gsub('Game ', '').to_i
-values = {}
-subsets.split(';').each do |subset|
-    subset.split(',').each do |colour_pair|
-    num, colour = colour_pair.split
-    values[colour] = num.to_i if values[colour].nil? || num.to_i > values[colour]
-    end
-end
-powers[game_id] = values.values.inject(:*)
-end
-puts powers.values.sum
+# file.each do |line|
+# game_id, subsets = line.split(': ')
+# game_id = game_id.gsub('Game ', '').to_i
+# values = {}
+# subsets.split(';').each do |subset|
+#     subset.split(',').each do |colour_pair|
+#     num, colour = colour_pair.split
+#     values[colour] = num.to_i if values[colour].nil? || num.to_i > values[colour]
+#     end
+# end
+# powers[game_id] = values.values.inject(:*)
+# end
+# puts powers.values.sum
+
+
+# Day 3
+# $sum = 0
+
+# class Number
+#     def initialize(me, x, y, length, lines)
+#         @me, @coords, @length, @lines = me, [x, y], length, lines
+#     end
+
+#     def find_chars
+#         rows = []
+#         x, y = @coords
+#         row_start = [x - 1, 0].max
+#         row_end = [x + @length + 1, @lines[y].length].min
+#         rows << @lines[y - 1][row_start...row_end] if y > 0
+#         rows << @lines[y][row_start...row_end]
+#         rows << @lines[y + 1][row_start...row_end] if y < @lines.length - 1
+
+#         rows.map! { |row| row.gsub(/[\n#{@me}.]/, '') }
+#         result = rows.join
+
+#         $sum += @me.to_i if result != ''
+#     end
+# end
+
+# lines = File.readlines("day3.txt")
+
+# lastX = 0
+# lastY = 0
+
+# lines.each.with_index do |v, k|
+#     v.each_char.with_index do |char, index|
+#         next if k == lastY && index < lastX
+#         if char =~ /\d/
+#             length = 1
+#             length += 1 while v[index + length] =~ /\d/
+#             number = Number.new(v[index...(index + length)], index, k, length, lines)
+#             number.find_chars
+#             lastX = index + length
+#             lastY = k
+#         end
+#     end
+# end
+
+# p $sum
+
+# class Number
+#     attr_reader :x, :y
+
+#     def initialize(x, y)
+#         @x = x
+#         @y = y
+#     end
+
+#     def find_whole_number(line)
+#         start = x
+#         finish = x
+#         start -= 1 while line[start - 1] =~ /[0-9]/ && start > 0
+#         finish += 1 while line[finish + 1] =~ /[0-9]/ && finish < line.length - 1
+#         line[start..finish]
+#     end
+# end
+
+# class Gear
+#     attr_reader :coords
+
+#     def initialize(x, y)
+#         @coords = [x, y]
+#     end
+
+#     def find_nums(lines)
+#         x, y = coords
+#         rows = []
+#         nums = []
+#         rows << lines[y - 1][(x - 1)..(x + 1)] if y > 0
+#         rows << lines[y][(x - 1)..(x + 1)]
+#         rows << lines[y + 1][(x - 1)..(x + 1)] if y < lines.length - 1
+#         connections = []
+#         rows.each.with_index do |row, k|
+#             next unless row =~ /[0-9]/
+
+#             if row[1] =~ /[0-9]/ && row[3] =~ /[0-9]/ && !(row[2] =~ /[0-9]/)
+#                 connections << [1, (k - 1)]
+#                 connections << [3, (k - 1)]
+#             elsif row[1] =~ /[0-9]/ && row[2] =~ /[0-9]/ && !(row[3] =~ /[0-9]/)
+#                 connections << [1, (k - 1)]
+#             else
+#                 row.each_char.with_index do |char, i|
+#                     connections << [(i - 1), (k - 1)] if char =~ /[0-9]/ && (connections.empty? || connections[-1][0] != (i - 2))
+#                 end
+#             end
+#         end
+#         if connections.size == 2
+#             connections.each do |connection|
+#                 nx = x + connection[0]
+#                 ny = y + connection[1]
+#                 number = Number.new(nx, ny)
+#                 nums << number.find_whole_number(lines[ny])
+#             end
+#             $sum += (nums[0].to_i * nums[1].to_i)
+#         end
+#     end
+# end
+
+# lines = File.open("day3.txt", "r") do |file|
+#     file.readlines
+# end
+
+# $sum = 0
+
+# lines.each.with_index do |v, k|
+#     v.each_char.with_index do |char, index|
+#         if char == "*"
+#             gear = Gear.new(index, k)
+#             gear.find_nums(lines)
+#         end
+#     end
+# end
+
+# puts $sum
