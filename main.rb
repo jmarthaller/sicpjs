@@ -234,3 +234,30 @@
 # end
 
 # puts $sum
+
+# Day 4
+file = File.open("day4.txt")
+points = 0
+
+file.each do |line|
+    point_multiplier = false
+    inner_points = 0
+
+    winning_numbers, owned_numbers = line.split("|").map { |side| side.split.map(&:to_i) }
+    winning_numbers.shift(2)
+
+    owned_numbers.each do |num|
+        if winning_numbers.include?(num) && !point_multiplier
+            inner_points += 1
+            point_multiplier = true
+        elsif winning_numbers.include?(num) && point_multiplier
+            inner_points *= 2
+        end
+    end
+
+    points += inner_points
+    inner_points = 0
+    point_multiplier = false
+end
+
+puts points
