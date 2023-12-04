@@ -236,28 +236,57 @@
 # puts $sum
 
 # Day 4
+# file = File.open("day4.txt")
+# points = 0
+
+# file.each do |line|
+#     point_multiplier = false
+#     inner_points = 0
+
+#     winning_numbers, owned_numbers = line.split("|").map { |side| side.split.map(&:to_i) }
+#     winning_numbers.shift(2)
+
+#     owned_numbers.each do |num|
+#         if winning_numbers.include?(num) && !point_multiplier
+#             inner_points += 1
+#             point_multiplier = true
+#         elsif winning_numbers.include?(num) && point_multiplier
+#             inner_points *= 2
+#         end
+#     end
+
+#     points += inner_points
+#     inner_points = 0
+#     point_multiplier = false
+# end
+
+# puts points
+
+
+scores = {}
 file = File.open("day4.txt")
-points = 0
-
 file.each do |line|
-    point_multiplier = false
-    inner_points = 0
+    card_id_string, numbers = line.split(': ')
+    _, card_id = card_id_string.split
+    scores[card_id.to_i] = { score: 0, count: 1 }
 
-    winning_numbers, owned_numbers = line.split("|").map { |side| side.split.map(&:to_i) }
-    winning_numbers.shift(2)
+    winning_numbers, our_numbers = numbers.split(' | ')
+    winning_numbers = winning_numbers.split.map(&:to_i)
+    our_numbers = our_numbers.split.map(&:to_i)
 
-    owned_numbers.each do |num|
-        if winning_numbers.include?(num) && !point_multiplier
-            inner_points += 1
-            point_multiplier = true
-        elsif winning_numbers.include?(num) && point_multiplier
-            inner_points *= 2
-        end
-    end
+    winning_number_count = winning_numbers.count
+    remaining_number_count = (winning_numbers - our_numbers).count
+    matched_number_count = winning_number_count - remaining_number_count
 
-    points += inner_points
-    inner_points = 0
-    point_multiplier = false
+    scores[card_id.to_i][:score] = matched_number_count
 end
 
-puts points
+scores.each do |key, value|
+    value[:count].times do
+        ((key + 1)..key + value[:score]).each do |idx|
+        scores[idx][:count] = scores[idx][:count] + 1
+        end
+    end
+end
+
+puts scores.values.map { |x| x[:count] }.sum
