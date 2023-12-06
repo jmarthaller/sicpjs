@@ -263,30 +263,210 @@
 # puts points
 
 
-scores = {}
-file = File.open("day4.txt")
-file.each do |line|
-    card_id_string, numbers = line.split(': ')
-    _, card_id = card_id_string.split
-    scores[card_id.to_i] = { score: 0, count: 1 }
+# scores = {}
+# file = File.open("day4.txt")
+# file.each do |line|
+#     card_id_string, numbers = line.split(': ')
+#     _, card_id = card_id_string.split
+#     scores[card_id.to_i] = { score: 0, count: 1 }
 
-    winning_numbers, our_numbers = numbers.split(' | ')
-    winning_numbers = winning_numbers.split.map(&:to_i)
-    our_numbers = our_numbers.split.map(&:to_i)
+#     winning_numbers, our_numbers = numbers.split(' | ')
+#     winning_numbers = winning_numbers.split.map(&:to_i)
+#     our_numbers = our_numbers.split.map(&:to_i)
 
-    winning_number_count = winning_numbers.count
-    remaining_number_count = (winning_numbers - our_numbers).count
-    matched_number_count = winning_number_count - remaining_number_count
+#     winning_number_count = winning_numbers.count
+#     remaining_number_count = (winning_numbers - our_numbers).count
+#     matched_number_count = winning_number_count - remaining_number_count
 
-    scores[card_id.to_i][:score] = matched_number_count
-end
+#     scores[card_id.to_i][:score] = matched_number_count
+# end
 
-scores.each do |key, value|
-    value[:count].times do
-        ((key + 1)..key + value[:score]).each do |idx|
-        scores[idx][:count] = scores[idx][:count] + 1
-        end
+# scores.each do |key, value|
+#     value[:count].times do
+#         ((key + 1)..key + value[:score]).each do |idx|
+#         scores[idx][:count] = scores[idx][:count] + 1
+#         end
+#     end
+# end
+
+# puts scores.values.map { |x| x[:count] }.sum
+
+
+# Day 5
+class Mapping
+    attr_reader :src, :dest
+  
+    def initialize(src, dest)
+      @src, @dest = [src, dest].map(&:to_sym)
+      @ranges = []
     end
-end
+  
+    def add_range(dest_start, src_start, length)
+      @ranges << [
+        (src_start...(src_start + length)),
+        (dest_start...(dest_start + length)),
+      ]
+    end
+  
+    def map(number)
+      if range = @ranges.find { |(s, _)| s.cover?(number) }
+        src_range, dest_range = range
+        dest_range.begin + (number - src_range.begin)
+      else
+        number
+      end
+    end
+  end
+  
+  almanac = []
+  seeds = []
+  
+  File.open(File.join(__dir__, 'day5.txt'), 'r') do |file|
+    line = file.readline.chomp
+    seeds = line[7..].split(/\s+/).map(&:to_i)
+    file.readline
+  
+    until file.eof?
+      line = file.readline.chomp
+      _, source, destination = /(\w+)-to-(\w+)/i.match(line).to_a
+  
+      mapping = Mapping.new(source, destination)
+      almanac << mapping
+  
+      loop do
+        line = file.readline.chomp
+        break if /\A\s*\z/.match?(line) || file.eof?
+  
+        dest_start, src_start, length = line.split(/\s+/).map(&:to_i)
+        mapping.add_range(dest_start, src_start, length)
+      end
+    end
+  end
+  
+  locations = seeds.map do |seed|
+    almanac.reduce(seed) { |seed, mapping| mapping.map(seed) }
+  end
+  
+  puts locations.min
 
-puts scores.values.map { |x| x[:count] }.sum
+
+# Part 2
+require 'pp'
+ 
+Seeds = Struct.new(:start, :length)
+Entry = Struct.new(:dest, :src, :range) do
+  def src_first() src end
+  def src_last() src + range end
+  def dest_last() dest + range end
+end
+Map = Struct.new(:from, :to, :entries)
+ 
+seed_ranges = []
+maps = []
+ 
+fin = File.open(ARGV[0] || 'day5.txt')
+while (line = fin.gets)
+  case line
+  when /^seeds: ([\d ]+)/
+    ary = $1.split().map(&:to_i)
+    i = 0
+    while i < ary.length
+      seed_ranges << Seeds.new(ary[i], ary[i+1])
+      i += 2
+    end
+  when /^(\w+)-to-(\w+) map:/
+    from, to = $1.to_sym, $2.to_sym
+    ary = []
+    while fin.gets =~ /\s*(\d+)\s+(\d+)\s+(\d+)/
+      ary << Entry.new($1.to_i, $2.to_i, $3.to_i)
+    end
+    maps << Map.new(from, to, ary)
+  when /\s*\r?\n/
+    # ignore blanks
+  else
+    raise "Unmatched line #{line.inspect}"
+  end
+end
+ 
+#pp seed_ranges
+#pp maps
+ 
+ranges = seed_ranges.map do |seeds|
+  seeds.start...seeds.start+seeds.length
+end.sort_by!(&:first).reverse!
+ 
+from = :seed
+map_i = 0
+while map_i < maps.length
+  map = maps[map_i]
+  ents = map.entries.sort_by(&:src).reverse!
+ 
+#   puts "#{map.from} ranges #{ranges.inspect}"
+ 
+  next_ranges = []
+  while (range = ranges.pop)
+    # puts "  range: #{range.inspect}"
+ 
+    a, b = range.first, range.last
+ 
+    # skip map entries ranging completely below range start
+    ents.pop while ents.length > 0 && ents[-1].src_last <= a
+ 
+    if ents.length > 0
+      ent = ents[-1]
+      off = ent.dest - ent.src
+    #   puts "  ent: #{ent.inspect} #{ent.src_first}...#{ent.src_last} -> #{ent.dest}...#{ent.dest_last}"
+ 
+      if a < (sf = ent.src_first) # range starts before map entry
+        if b < sf # range ends before map entry
+          # add whole range as direct map (identity)
+          next_ranges << (a...b)
+        else # range ends in or after map entry
+          # add first part of range as direct map
+          next_ranges << (a...sf)
+        #   puts "    (split) #{a}...#{sf}"
+          # enqueue remaining range
+          ranges << (sf...b)
+        end
+      else # range starts inside map entry
+        sl = ent.src_last
+        if b <= sl # range ends inside map entry
+          # add whole range mapped by offset
+          next_ranges << (a+off...b+off)
+        #   puts "    #{a}...#{b} -> #{a+off}...#{b+off}"
+        else # range ends after map entry
+          # add first part of range offseted
+          next_ranges << (a+off...sl+off)
+        #   puts "    #{a}...#{b} -> (split) #{a+off}...#{sl+off}"
+          # enqueue remaining range
+          ranges << (sl...b)
+        end
+      end
+    else
+      # range maps directly
+      next_ranges << range
+    end
+  end
+ 
+  ranges = next_ranges.sort_by(&:first)
+ 
+  # merge ranges - neat but doesn't speed things up appreciably
+  i = 0
+  while (j = i + 1) < ranges.length
+    if ranges[i].last >= ranges[j].first # overlap
+      if ranges[i].last <= ranges[j].last # but [j] is not a subset of [i]
+        ranges[i] = ranges[i].first...ranges[j].last # merge
+      end
+      ranges.delete_at(j)
+    else # nothing to merge, advance
+      i = j
+    end
+  end
+  ranges.reverse! # so we can .pop instead of .shift
+ 
+  map_i += 1
+end
+ 
+# puts "\nfinal ranges #{ranges.reverse.inspect}"
+ 
+puts ranges[-1].first
