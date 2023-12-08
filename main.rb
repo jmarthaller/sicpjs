@@ -529,86 +529,178 @@
 # puts amount_winning_times
 
 # Day 7
-order = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'].reverse
-predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
+# order = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'].reverse
+# predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
 
-def handy_tally(str)
-  str.chars.tally.values.sort
-end
+# def handy_tally(str)
+#   str.chars.tally.values.sort
+# end
 
-def is_five_of_a_kind?(str) = handy_tally(str) == [5]
-def is_four_of_a_kind?(str) = handy_tally(str) == [1, 4]
-def is_full_house?(str) = handy_tally(str) == [2, 3]
-def is_three_of_a_kind?(str) = handy_tally(str) == [1, 1, 3]
-def is_two_pair?(str) = handy_tally(str) == [1, 2, 2]
-def is_one_pair?(str) = handy_tally(str) == [1, 1, 1, 2]
-def is_high_card?(str) = handy_tally(str) == [1, 1, 1, 1, 1]
+# def is_five_of_a_kind?(str) = handy_tally(str) == [5]
+# def is_four_of_a_kind?(str) = handy_tally(str) == [1, 4]
+# def is_full_house?(str) = handy_tally(str) == [2, 3]
+# def is_three_of_a_kind?(str) = handy_tally(str) == [1, 1, 3]
+# def is_two_pair?(str) = handy_tally(str) == [1, 2, 2]
+# def is_one_pair?(str) = handy_tally(str) == [1, 1, 1, 2]
+# def is_high_card?(str) = handy_tally(str) == [1, 1, 1, 1, 1]
 
-hands = []
-File.read('day7.txt').lines.each do |line|
-  hand, bid = line.split(' ')
-  rank = [-1]
-  predicates.each_with_index do |pred, index|
-    if send(pred, hand)
-      rank = [[index, rank[0]].max]
+# hands = []
+# File.read('day7.txt').lines.each do |line|
+#   hand, bid = line.split(' ')
+#   rank = [-1]
+#   predicates.each_with_index do |pred, index|
+#     if send(pred, hand)
+#       rank = [[index, rank[0]].max]
+#     end
+#   end
+
+#   line.chars.each do |c|
+#     rank << order.index(c)
+#   end
+
+#   # puts "Hand #{hand} Bid #{bid} #{rank}"
+#   hands << [rank, bid.to_i]
+# end
+# hands.sort!
+# sum = 0
+# hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
+# puts sum
+
+
+
+# order = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'].reverse
+# predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
+
+# def handy_tally(str)
+#   tally = str.chars.tally
+#   return [tally.values.sort] unless tally['J']
+#   orig = tally.dup
+#   j_val = tally.delete('J')
+#   ret = [orig.values.sort]
+#   tally.each do |k, v|
+#     ret << tally.merge(k => v + j_val).values.sort
+#   end
+#   ret
+# end
+
+# def is_five_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [5] }
+# def is_four_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [1, 4] }
+# def is_full_house?(str) = handy_tally(str).any? { |tal| tal == [2, 3] }
+# def is_three_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 3] }
+# def is_two_pair?(str) = handy_tally(str).any? { |tal| tal == [1, 2, 2] }
+# def is_one_pair?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 1, 2] }
+# def is_high_card?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 1, 1, 1] }
+
+# hands = []
+# File.read('day7.txt').lines.each do |line|
+#   hand, bid = line.split(' ')
+#   rank = [-1]
+#   predicates.each_with_index do |pred, index|
+#     if send(pred, hand)
+#       rank = [[index, rank[0]].max]
+#     end
+#   end
+
+#   line.chars.each do |c|
+#     rank << order.index(c)
+#   end
+
+#   # puts "Hand #{hand} Bid #{bid} #{rank}"
+#   hands << [rank, bid.to_i]
+# end
+# hands.sort!
+# sum = 0
+# hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
+# puts sum
+
+# Day 8
+
+# left_right = files.split("\n")[0]
+# coordinates = files.split("\n")[2..-1]
+# steps = 0
+
+# coordinates.each do |coordinate|
+#     landing_point = coordinate.split(" = ")[0]
+#     coordinate_set = coordinate.split(" = ")[1]
+
+#     left_coordinate_set = coordinate_set[1, 3]
+#     right_coordinate_set = coordinate_set[6..-2]
+
+
+#     steps += 1
+# end
+def for_each_line_with_index(path, no_strip: false)
+    idx = 0
+    File.readlines(path).each do |line|
+        line = line.strip unless no_strip
+        yield(line, idx)
+        idx += 1
     end
-  end
-
-  line.chars.each do |c|
-    rank << order.index(c)
-  end
-
-  # puts "Hand #{hand} Bid #{bid} #{rank}"
-  hands << [rank, bid.to_i]
-end
-hands.sort!
-sum = 0
-hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
-puts sum
-
-
-
-order = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'].reverse
-predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
-
-def handy_tally(str)
-  tally = str.chars.tally
-  return [tally.values.sort] unless tally['J']
-  orig = tally.dup
-  j_val = tally.delete('J')
-  ret = [orig.values.sort]
-  tally.each do |k, v|
-    ret << tally.merge(k => v + j_val).values.sort
-  end
-  ret
 end
 
-def is_five_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [5] }
-def is_four_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [1, 4] }
-def is_full_house?(str) = handy_tally(str).any? { |tal| tal == [2, 3] }
-def is_three_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 3] }
-def is_two_pair?(str) = handy_tally(str).any? { |tal| tal == [1, 2, 2] }
-def is_one_pair?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 1, 2] }
-def is_high_card?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 1, 1, 1] }
 
-hands = []
-File.read('day7.txt').lines.each do |line|
-  hand, bid = line.split(' ')
-  rank = [-1]
-  predicates.each_with_index do |pred, index|
-    if send(pred, hand)
-      rank = [[index, rank[0]].max]
+# files = File.readlines("day8.txt")
+# instructions = []
+# instruction_count = 0
+# map = {}
+# for_each_line_with_index('day8.txt') do |line, idx|
+#     if idx.zero?
+#         instructions = line.chars
+#         instruction_count = instructions.count
+#     else
+#         next if line == ''
+
+#         key, nodes = line.split(' = ')
+#         left, right = nodes.gsub('(', '').gsub(')', '').split(', ')
+#         map[key] = { left: left, right: right }
+#     end
+# end
+
+# next_node = 'AAA'
+# step = 0
+# while next_node != 'ZZZ'
+#     next_node =
+#         if instructions[step % instruction_count] == 'L'
+#             map[next_node][:left]
+#         else
+#             map[next_node][:right]
+#         end
+#     step += 1
+# end
+
+# puts step
+
+
+instructions = []
+instruction_count = 0
+next_nodes = []
+map = {}
+for_each_line_with_index('day8.txt') do |line, idx|
+if idx.zero?
+    instructions = line.chars
+    instruction_count = instructions.count
+else
+    next if line == ''
+
+    key, nodes = line.split(' = ')
+    next_nodes << key if key.chars[2] == 'A'
+    left, right = nodes.gsub('(', '').gsub(')', '').split(', ')
+    map[key] = { left: left, right: right }
+end
+end
+
+steps = []
+next_nodes.each do |next_node|
+step = 0
+while next_node.chars[2] != 'Z'
+    next_node =
+    if instructions[step % instruction_count] == 'L'
+        map[next_node][:left]
+    else
+        map[next_node][:right]
     end
-  end
-
-  line.chars.each do |c|
-    rank << order.index(c)
-  end
-
-  # puts "Hand #{hand} Bid #{bid} #{rank}"
-  hands << [rank, bid.to_i]
+    step += 1
 end
-hands.sort!
-sum = 0
-hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
-puts sum
+steps << step
+end
+puts steps.reduce(1, :lcm)
