@@ -472,58 +472,143 @@
 # puts ranges[-1].first
 
 # Day 6
-INPUT = 'day6.txt'
+# INPUT = 'day6.txt'
 
-def times
-  File.readlines(INPUT)[0].split.drop(1).map(&:to_i)
+# def times
+#   File.readlines(INPUT)[0].split.drop(1).map(&:to_i)
+# end
+
+# def distances
+#   File.readlines(INPUT)[1].split.drop(1).map(&:to_i)
+# end
+
+# def time
+#   File.readlines(INPUT)[0].gsub('Time:', '').gsub(' ', '').to_i
+# end
+
+# def distance
+#   File.readlines(INPUT)[1].gsub('Distance:', '').gsub(' ', '').to_i
+# end
+
+# # return an array containing ranges of every winning time for each race by zipping
+# def get_all_winning_times(times, distances)
+#   races = []
+#   times.zip(distances).each do |race|
+#     races.push(get_winning_times(race[0], race[1]))
+#   end
+#   races
+# end
+
+# # get the winning times
+# # this is the quadratic formula, but i fucked it up beyond recognition to satisfy rubocop...
+# def get_winning_times(time, distance)
+#   a = time**2
+#   b = Math.sqrt(a - 4 * -1.0 * -distance)
+#   c = 2 * -1.0
+
+#   ((-a + b) / c).ceil..((-a - b) / c).floor
+# end
+
+# def multiply_amount_winning_times
+#   sum = 1
+#   get_all_winning_times(times, distances).each do |times|
+#     sum *= times.count
+#   end
+#   sum
+# end
+
+# def amount_winning_times
+#   times = get_winning_times(time, distance)
+#   times.last - times.first - 1
+# end
+
+# # part 1 answer
+# puts multiply_amount_winning_times
+
+# # part 2 answer
+# puts amount_winning_times
+
+# Day 7
+order = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'].reverse
+predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
+
+def handy_tally(str)
+  str.chars.tally.values.sort
 end
 
-def distances
-  File.readlines(INPUT)[1].split.drop(1).map(&:to_i)
-end
+def is_five_of_a_kind?(str) = handy_tally(str) == [5]
+def is_four_of_a_kind?(str) = handy_tally(str) == [1, 4]
+def is_full_house?(str) = handy_tally(str) == [2, 3]
+def is_three_of_a_kind?(str) = handy_tally(str) == [1, 1, 3]
+def is_two_pair?(str) = handy_tally(str) == [1, 2, 2]
+def is_one_pair?(str) = handy_tally(str) == [1, 1, 1, 2]
+def is_high_card?(str) = handy_tally(str) == [1, 1, 1, 1, 1]
 
-def time
-  File.readlines(INPUT)[0].gsub('Time:', '').gsub(' ', '').to_i
-end
-
-def distance
-  File.readlines(INPUT)[1].gsub('Distance:', '').gsub(' ', '').to_i
-end
-
-# return an array containing ranges of every winning time for each race by zipping
-def get_all_winning_times(times, distances)
-  races = []
-  times.zip(distances).each do |race|
-    races.push(get_winning_times(race[0], race[1]))
+hands = []
+File.read('day7.txt').lines.each do |line|
+  hand, bid = line.split(' ')
+  rank = [-1]
+  predicates.each_with_index do |pred, index|
+    if send(pred, hand)
+      rank = [[index, rank[0]].max]
+    end
   end
-  races
-end
 
-# get the winning times
-# this is the quadratic formula, but i fucked it up beyond recognition to satisfy rubocop...
-def get_winning_times(time, distance)
-  a = time**2
-  b = Math.sqrt(a - 4 * -1.0 * -distance)
-  c = 2 * -1.0
-
-  ((-a + b) / c).ceil..((-a - b) / c).floor
-end
-
-def multiply_amount_winning_times
-  sum = 1
-  get_all_winning_times(times, distances).each do |times|
-    sum *= times.count
+  line.chars.each do |c|
+    rank << order.index(c)
   end
-  sum
+
+  # puts "Hand #{hand} Bid #{bid} #{rank}"
+  hands << [rank, bid.to_i]
+end
+hands.sort!
+sum = 0
+hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
+puts sum
+
+
+
+order = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'].reverse
+predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
+
+def handy_tally(str)
+  tally = str.chars.tally
+  return [tally.values.sort] unless tally['J']
+  orig = tally.dup
+  j_val = tally.delete('J')
+  ret = [orig.values.sort]
+  tally.each do |k, v|
+    ret << tally.merge(k => v + j_val).values.sort
+  end
+  ret
 end
 
-def amount_winning_times
-  times = get_winning_times(time, distance)
-  times.last - times.first - 1
+def is_five_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [5] }
+def is_four_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [1, 4] }
+def is_full_house?(str) = handy_tally(str).any? { |tal| tal == [2, 3] }
+def is_three_of_a_kind?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 3] }
+def is_two_pair?(str) = handy_tally(str).any? { |tal| tal == [1, 2, 2] }
+def is_one_pair?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 1, 2] }
+def is_high_card?(str) = handy_tally(str).any? { |tal| tal == [1, 1, 1, 1, 1] }
+
+hands = []
+File.read('day7.txt').lines.each do |line|
+  hand, bid = line.split(' ')
+  rank = [-1]
+  predicates.each_with_index do |pred, index|
+    if send(pred, hand)
+      rank = [[index, rank[0]].max]
+    end
+  end
+
+  line.chars.each do |c|
+    rank << order.index(c)
+  end
+
+  # puts "Hand #{hand} Bid #{bid} #{rank}"
+  hands << [rank, bid.to_i]
 end
-
-# part 1 answer
-puts multiply_amount_winning_times
-
-# part 2 answer
-puts amount_winning_times
+hands.sort!
+sum = 0
+hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
+puts sum
