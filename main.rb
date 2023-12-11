@@ -881,224 +881,247 @@ end
 
 
 # Part 2
-require 'pp'
+# require 'pp'
  
-input = File.readlines(ARGV[0] || 'day10.txt').map(&:rstrip)
+# input = File.readlines(ARGV[0] || 'day10.txt').map(&:rstrip)
  
-start_row = start_col = 0
-input.each_with_index do |line, row|
-  if (col = line.index('S'))
-    start_row = row
-    start_col = col
-    break
-  end
-end
+# start_row = start_col = 0
+# input.each_with_index do |line, row|
+#   if (col = line.index('S'))
+#     start_row = row
+#     start_col = col
+#     break
+#   end
+# end
  
-puts "start at #{start_row}, #{start_col}"
+# puts "start at #{start_row}, #{start_col}"
  
-$width = input[0].length
-$height = input.length
-puts "#{$width} x #{$height} = #{$width*$height}"
+# $width = input[0].length
+# $height = input.length
+# puts "#{$width} x #{$height} = #{$width*$height}"
  
-# start by searching cardinal directions clockwise beacuse we don't
-# know what shape pipe 'S' is
-paths = []
-go = []
+# # start by searching cardinal directions clockwise beacuse we don't
+# # know what shape pipe 'S' is
+# paths = []
+# go = []
  
-# up
-r, c = start_row-1, start_col
-if r >= 0 && r < $height && c >= 0 && c < $width
-  if '|7F'.index(input[r][c])
-    paths << [r, c]
-    go << :up
-  end
-end
-# right
-r, c = start_row, start_col+1
-if r >= 0 && r < $height && c >= 0 && c < $width
-  if '-J7'.index(input[r][c])
-    paths << [r, c]
-    go << :rt
-  end
-end
-# down
-r, c = start_row+1, start_col
-if r >= 0 && r < $height && c >= 0 && c < $width
-  if '|LJ'.index(input[r][c])
-    paths << [r, c]
-    go << :dn
-  end
-end
-# left
-r, c = start_row, start_col-1
-if r >= 0 && r < $height && c >= 0 && c < $width
-  if '-LF'.index(input[r][c])
-    paths << [r, c]
-    go << :lt
-  end
-end
+# # up
+# r, c = start_row-1, start_col
+# if r >= 0 && r < $height && c >= 0 && c < $width
+#   if '|7F'.index(input[r][c])
+#     paths << [r, c]
+#     go << :up
+#   end
+# end
+# # right
+# r, c = start_row, start_col+1
+# if r >= 0 && r < $height && c >= 0 && c < $width
+#   if '-J7'.index(input[r][c])
+#     paths << [r, c]
+#     go << :rt
+#   end
+# end
+# # down
+# r, c = start_row+1, start_col
+# if r >= 0 && r < $height && c >= 0 && c < $width
+#   if '|LJ'.index(input[r][c])
+#     paths << [r, c]
+#     go << :dn
+#   end
+# end
+# # left
+# r, c = start_row, start_col-1
+# if r >= 0 && r < $height && c >= 0 && c < $width
+#   if '-LF'.index(input[r][c])
+#     paths << [r, c]
+#     go << :lt
+#   end
+# end
  
-print "initial paths: "
-p paths
+# print "initial paths: "
+# p paths
  
-s_is =
-  if go.include? :up
-    go.include?(:lt) ? 'J' : 'L'
-  elsif go.include? :dn
-    go.include?(:lt) ? '7' : 'F'
-  else
-    nil
-  end
-puts "s is #{s_is}"
+# s_is =
+#   if go.include? :up
+#     go.include?(:lt) ? 'J' : 'L'
+#   elsif go.include? :dn
+#     go.include?(:lt) ? '7' : 'F'
+#   else
+#     nil
+#   end
+# puts "s is #{s_is}"
  
-# clean up map
-clean = [nil] * $height
-$height.times { clean[_1] = '.' * $width}
-clean[start_row][start_col] = 'S'
+# # clean up map
+# clean = [nil] * $height
+# $height.times { clean[_1] = '.' * $width}
+# clean[start_row][start_col] = 'S'
  
-visited = {[start_row, start_col] => true}
+# visited = {[start_row, start_col] => true}
  
-at = paths[0]
-loop do
-  puts "at #{at.join(', ')}"
-  visited[at] = true
-  r, c = at
-  clean[r][c] = input[r][c]
-  candidates =
-    case input[r][c]
-    when '|' then [[r-1, c], [r+1, c]]
-    when '-' then [[r, c-1], [r, c+1]]
-    when 'L' then [[r-1, c], [r, c+1]]
-    when 'J' then [[r-1, c], [r, c-1]]
-    when '7' then [[r, c-1], [r+1, c]]
-    when 'F' then [[r+1, c], [r, c+1]]
-    when 'S' then break
-    else
-      raise "#{r}, #{c} is #{input[r][c]}"
-    end
-  puts "candidates: #{candidates.inspect}"
-  nxt = nil
-  candidates.each do |pos|
-    r, c = pos
-    if r < 0 || r >= $height || c < 0 || c >= $width
-      raise "#{at.join(', ')} -> #{r}, #{c} (out of bounds)"
-    end
-    if !visited[pos] # take this path
-      #puts "taking [#{r}][#{c}] = #{input[r][c]}"
-      nxt = pos
-      break
-    end
-  end
-  break unless nxt
-  at = nxt
-  #puts "\nat #{at}"
-  #pp clean
-end
+# at = paths[0]
+# loop do
+#   puts "at #{at.join(', ')}"
+#   visited[at] = true
+#   r, c = at
+#   clean[r][c] = input[r][c]
+#   candidates =
+#     case input[r][c]
+#     when '|' then [[r-1, c], [r+1, c]]
+#     when '-' then [[r, c-1], [r, c+1]]
+#     when 'L' then [[r-1, c], [r, c+1]]
+#     when 'J' then [[r-1, c], [r, c-1]]
+#     when '7' then [[r, c-1], [r+1, c]]
+#     when 'F' then [[r+1, c], [r, c+1]]
+#     when 'S' then break
+#     else
+#       raise "#{r}, #{c} is #{input[r][c]}"
+#     end
+#   puts "candidates: #{candidates.inspect}"
+#   nxt = nil
+#   candidates.each do |pos|
+#     r, c = pos
+#     if r < 0 || r >= $height || c < 0 || c >= $width
+#       raise "#{at.join(', ')} -> #{r}, #{c} (out of bounds)"
+#     end
+#     if !visited[pos] # take this path
+#       #puts "taking [#{r}][#{c}] = #{input[r][c]}"
+#       nxt = pos
+#       break
+#     end
+#   end
+#   break unless nxt
+#   at = nxt
+#   #puts "\nat #{at}"
+#   #pp clean
+# end
  
-puts
-clean.each {puts _1}
+# puts
+# clean.each {puts _1}
  
  
-=begin
-# flood fill '.'s from outside
-queue = [[0,0]]
-until queue.empty?
-  r, c = queue.pop
-  case clean[r][c]
-  when '.'
-    clean[r][c] = ' '
-    [[-1, 0], [0, 1], [1, 0], [0, -1]].each do |dr, dc|
-      r1 = r + dr; c1 = c + dc
-      if 0 <= r1 && r1 < $height && 0 <= c1 && c1 < $width
-        queue << [r1, c1] if clean[r1][c1] == '.'
-      end
-    end
-  when '|'
-  when '-'
-  when 'L'
-  when 'J'
-  when '7'
-  when 'F'
-  when 'S'
-  end
-end
+# =begin
+# # flood fill '.'s from outside
+# queue = [[0,0]]
+# until queue.empty?
+#   r, c = queue.pop
+#   case clean[r][c]
+#   when '.'
+#     clean[r][c] = ' '
+#     [[-1, 0], [0, 1], [1, 0], [0, -1]].each do |dr, dc|
+#       r1 = r + dr; c1 = c + dc
+#       if 0 <= r1 && r1 < $height && 0 <= c1 && c1 < $width
+#         queue << [r1, c1] if clean[r1][c1] == '.'
+#       end
+#     end
+#   when '|'
+#   when '-'
+#   when 'L'
+#   when 'J'
+#   when '7'
+#   when 'F'
+#   when 'S'
+#   end
+# end
  
-puts
-clean.each {puts _1}
-=end
+# puts
+# clean.each {puts _1}
+# =end
  
-=begin
-# count remaining '.'s
-ndots = 0
-clean.each do |line|
-  line.each_char {|c| ndots += 1 if c == '.'}
-end
-puts "\n#{ndots} dots remain"
-=end
+# =begin
+# # count remaining '.'s
+# ndots = 0
+# clean.each do |line|
+#   line.each_char {|c| ndots += 1 if c == '.'}
+# end
+# puts "\n#{ndots} dots remain"
+# =end
  
-# apply (simplified?) even-odd winding rule
+# # apply (simplified?) even-odd winding rule
  
-unwound = []
+# unwound = []
  
-internal = 0
-clean.each do |line|
-  next if line =~ /^\.+$/
-  x = 0
-=begin
-  (0...line.length).each do |col|
-    case line[col]
-    when '|', 'L', 'J', '7', 'F'
-      x += 1
-    when '.'
-      #line[col] = x.even? ? ' ' : '~'
-      line[col] = ' ' if x.even?
-    when 'S'
-      x += 1 if '|LJ7F'.index(s_is)
-    end
-=end
+# internal = 0
+# clean.each do |line|
+#   next if line =~ /^\.+$/
+#   x = 0
+# =begin
+#   (0...line.length).each do |col|
+#     case line[col]
+#     when '|', 'L', 'J', '7', 'F'
+#       x += 1
+#     when '.'
+#       #line[col] = x.even? ? ' ' : '~'
+#       line[col] = ' ' if x.even?
+#     when 'S'
+#       x += 1 if '|LJ7F'.index(s_is)
+#     end
+# =end
  
-  u = ''
-  line.scan(/F(?:-*J)?|L(?:-*7)?|./) do |m|
-    case m
-    when '|', 'L', 'J', '7', 'F', 'S'
-      x += 1
-      u << m
-    when /F-*J|L-*7/ # these act line one vertical edge
-      x += 1
-      u << m
-    when '.'
-      if x.even?
-        u << ' '
-      else
-        u << '.'
-        internal += 1
-      end
-    else
-      u << m
-    end
-  end
-  unwound << u
-end
+#   u = ''
+#   line.scan(/F(?:-*J)?|L(?:-*7)?|./) do |m|
+#     case m
+#     when '|', 'L', 'J', '7', 'F', 'S'
+#       x += 1
+#       u << m
+#     when /F-*J|L-*7/ # these act line one vertical edge
+#       x += 1
+#       u << m
+#     when '.'
+#       if x.even?
+#         u << ' '
+#       else
+#         u << '.'
+#         internal += 1
+#       end
+#     else
+#       u << m
+#     end
+#   end
+#   unwound << u
+# end
  
-# puts "\nApply even-odd rule:"
-# unwound.each {puts(_1.gsub('.', "\e[94m@\e[0m"))}
+# # puts "\nApply even-odd rule:"
+# # unwound.each {puts(_1.gsub('.', "\e[94m@\e[0m"))}
  
-puts "\n#{internal} still inside"
+# puts "\n#{internal} still inside"
  
-# puts "\nRemap:"
-symbols = [
-  ['F', "\u250F"],
-  ['J', "\u251B"],
-  ['L', "\u2517"],
-  ['7', "\u2513"],
-  ['|', "\u2503"],
-  ['-', "\u2501"],
-]
-unwound.each do |line|
-  symbols.each do |a, b|
-    line = line.gsub(a, b)
-  end
-  puts line
-end
+# # puts "\nRemap:"
+# symbols = [
+#   ['F', "\u250F"],
+#   ['J', "\u251B"],
+#   ['L', "\u2517"],
+#   ['7', "\u2513"],
+#   ['|', "\u2503"],
+#   ['-', "\u2501"],
+# ]
+# unwound.each do |line|
+#   symbols.each do |a, b|
+#     line = line.gsub(a, b)
+#   end
+#   puts line
+# end
 
 
+# Day 11 - change the 1000000 to 2 for part 1 answer
+rows = File.readlines('day11.txt').map(&:chomp).map(&:chars)
+inflated_y, inflated_x = [rows, rows.transpose].map { |xs|
+  xs.reduce([]) { |inflated, col|
+    prev = inflated.empty? ? -1 : inflated[-1]
+    inflated << prev + (col.all? { _1 == '.' } ? 1000000 : 1)
+  }
+}
+stars = []
+(0...rows.size).each { |y|
+  (0...rows[0].size).each { |x|
+    stars << [inflated_x[x], inflated_y[y]] if rows[y][x] == '#'
+  }
+}
+result = 0
+(0...stars.size).each { |i|
+  (0...i).each { |j|
+    a, b = stars[i], stars[j]
+    dist = (a[0] - b[0]).abs + (a[1] - b[1]).abs
+    result += dist
+  }
+}
+puts result
