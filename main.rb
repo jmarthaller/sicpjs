@@ -1282,58 +1282,114 @@ end
 
 
 # Day 13
-# Day 13
-INPUT = "day13.txt"
+# # Day 13
+# INPUT = "day13.txt"
  
-def parse_grids
-  File.foreach(INPUT).chunk do |line|
-    /\A\s*\z/ !~ line || nil
-  end.map do |_, lines|
-    lines.map(&:strip).map { |line| line.chars }
+# def parse_grids
+#   File.foreach(INPUT).chunk do |line|
+#     /\A\s*\z/ !~ line || nil
+#   end.map do |_, lines|
+#     lines.map(&:strip).map { |line| line.chars }
+#   end
+# end
+ 
+# def row_diff(row1, row2)
+#   row1.zip(row2).count { |e1, e2| e1 != e2 }
+# end
+ 
+# def find_reflection_row(grid, required_smudges)
+#   max_mid = -1
+#   (0...grid.size - 1).each do |middle|
+#     up = middle
+#     down = up + 1
+ 
+#     is_reflection = true
+#     smudges = 0
+#     while up >= 0 && down <= grid.size - 1
+#       diff = row_diff(grid[up], grid[down])
+#       smudges += diff
+#       if smudges > required_smudges
+#         is_reflection = false
+#         break
+#       end
+#       up -= 1
+#       down += 1
+#     end
+ 
+#     max_mid = middle if smudges == required_smudges && is_reflection && (up <= 0 || down >= grid.size - 1)
+#   end
+#   max_mid + 1
+# end
+ 
+# def find_reflection_column(grid, required_smudges)
+#   find_reflection_row(grid.transpose, required_smudges)
+# end
+ 
+# def score(grid, required_smudges)
+#   ref_row = find_reflection_row(grid, required_smudges)
+#   ref_column = find_reflection_column(grid, required_smudges)
+#   100 * ref_row + ref_column
+# end
+ 
+# grids = parse_grids
+# ans1 = grids.map { |grid| score(grid, 0) }.sum
+# ans2 = grids.map { |grid| score(grid, 1) }.sum
+ 
+# puts "Part 1 #{ans1}"
+# puts "Part 2 #{ans2}"
+
+# Day 14
+def tilt_north(data)
+    data = data.map(&:dup)
+    (0...data.size).each { |y|
+      (0...data[0].size).each { |x|
+        next unless data[y][x] == 'O'
+        new_y = (0...y).reverse_each.lazy.
+          take_while { data[_1][x] == '.' }.reduce { _2 }
+        if new_y
+          data[new_y][x] = 'O'
+          data[y][x] = '.'
+        end
+      }
+    }
+    data
   end
-end
- 
-def row_diff(row1, row2)
-  row1.zip(row2).count { |e1, e2| e1 != e2 }
-end
- 
-def find_reflection_row(grid, required_smudges)
-  max_mid = -1
-  (0...grid.size - 1).each do |middle|
-    up = middle
-    down = up + 1
- 
-    is_reflection = true
-    smudges = 0
-    while up >= 0 && down <= grid.size - 1
-      diff = row_diff(grid[up], grid[down])
-      smudges += diff
-      if smudges > required_smudges
-        is_reflection = false
-        break
-      end
-      up -= 1
-      down += 1
+  
+  def north_load(data)
+    (0...data.size).lazy.filter_map { |y|
+      (0...data[0].size).lazy.filter_map { |x|
+        data.size - y if data[y][x] == 'O'
+      }.sum
+    }.sum
+  end
+
+# data = File.open("day14.txt").readlines(chomp: true)
+# puts north_load(tilt_north(data))
+
+def transpose(data) = data.map(&:chars).transpose.map(&:join)
+def reverse(data) = data.reverse
+
+def tilt_south(data) = reverse tilt_north reverse data
+def tilt_west(data) = transpose tilt_north transpose data
+def tilt_east(data) = transpose reverse tilt_north reverse transpose data
+def cycle(data) = tilt_east tilt_south tilt_west tilt_north data
+
+def cycles(data, n)
+  seq = [data]
+  cycle_begin = 0
+  loop do
+    data = cycle(data)
+    idx = seq.index(data)
+    if !idx.nil?
+      cycle_begin = idx
+      break
     end
- 
-    max_mid = middle if smudges == required_smudges && is_reflection && (up <= 0 || down >= grid.size - 1)
+    seq << data
   end
-  max_mid + 1
+  return seq[n] if n < cycle_begin
+  seq[cycle_begin + ((n - cycle_begin) % (seq.size - cycle_begin))]
 end
- 
-def find_reflection_column(grid, required_smudges)
-  find_reflection_row(grid.transpose, required_smudges)
-end
- 
-def score(grid, required_smudges)
-  ref_row = find_reflection_row(grid, required_smudges)
-  ref_column = find_reflection_column(grid, required_smudges)
-  100 * ref_row + ref_column
-end
- 
-grids = parse_grids
-ans1 = grids.map { |grid| score(grid, 0) }.sum
-ans2 = grids.map { |grid| score(grid, 1) }.sum
- 
-puts "Part 1 #{ans1}"
-puts "Part 2 #{ans2}"
+
+data = File.open("day14.txt").readlines(chomp: true)
+data = cycles(data, 1000000000)
+puts north_load(data)
