@@ -1,33 +1,33 @@
 # # # Day 1
-# # # Read in day1.txt with Ruby
-# # file = File.open("day1.txt")
-# # # iterate over contents
+# # Read in day1.txt with Ruby
+# file = File.open("day1.txt")
+# # iterate over contents
 
-# # word_digits = {"one" => 1, "two" => 2, "three" => 3, "four" => 4, "five" => 5, "six" => 6, "seven" => 7, "eight" => 8, "nine" => 9}
+# word_digits = {"one" => 1, "two" => 2, "three" => 3, "four" => 4, "five" => 5, "six" => 6, "seven" => 7, "eight" => 8, "nine" => 9}
 
-# # output_array = []
-# # file.each do |line|
-# #     # for each line, filter out the non-integers, unless the letters appear in sequence as keys in word_digits hash
-# #     # split the line into an array of characters
+# output_array = []
+# file.each do |line|
+#     # for each line, filter out the non-integers, unless the letters appear in sequence as keys in word_digits hash
+#     # split the line into an array of characters
 
-# #     puts "#{num}"
+#     puts "#{num}"
     
-# #     # create a new number of the first and last digit in the array
-# #     # if there's only one digit, create a new number of two of that one digit (e.g. 7 = 77)
-# #     new_num = nil
-# #     if num.length == 1
-# #         new_num = num[0].to_i * 11
-# #     else
-# #         new_num = num[0] + num[-1]
-# #     end
-# #     new_num = new_num.to_i
-# #     # add the new number to the output array
-# #     output_array << new_num
-# # end
+#     # create a new number of the first and last digit in the array
+#     # if there's only one digit, create a new number of two of that one digit (e.g. 7 = 77)
+#     new_num = nil
+#     if num.length == 1
+#         new_num = num[0].to_i * 11
+#     else
+#         new_num = num[0] + num[-1]
+#     end
+#     new_num = new_num.to_i
+#     # add the new number to the output array
+#     output_array << new_num
+# end
 
-# # # sum the output array
-# # sum = output_array.sum
-# # puts sum
+# # sum the output array
+# sum = output_array.sum
+# puts sum
 
 
 
@@ -95,7 +95,7 @@
 #     impossible_games << game_id
 #     end
 # end
-# # puts possible_games.sum
+# puts possible_games.sum
 
 # powers = {}
 # file = File.open("day2.txt")
@@ -115,7 +115,7 @@
 # puts powers.values.sum
 
 
-# Day 3
+# # Day 3
 # $sum = 0
 
 # class Number
@@ -235,7 +235,7 @@
 
 # puts $sum
 
-# Day 4
+# # Day 4
 # file = File.open("day4.txt")
 # points = 0
 
@@ -292,7 +292,7 @@
 # puts scores.values.map { |x| x[:count] }.sum
 
 
-# Day 5
+# # Day 5
 # class Mapping
 #     attr_reader :src, :dest
   
@@ -350,7 +350,7 @@
 #   puts locations.min
 
 
-# # Part 2
+# Part 2
 # require 'pp'
  
 # Seeds = Struct.new(:start, :length)
@@ -388,8 +388,8 @@
 #   end
 # end
  
-# #pp seed_ranges
-# #pp maps
+#pp seed_ranges
+#pp maps
  
 # ranges = seed_ranges.map do |seeds|
 #   seeds.start...seeds.start+seeds.length
@@ -401,7 +401,7 @@
 #   map = maps[map_i]
 #   ents = map.entries.sort_by(&:src).reverse!
  
-# #   puts "#{map.from} ranges #{ranges.inspect}"
+#   puts "#{map.from} ranges #{ranges.inspect}"
  
 #   next_ranges = []
 #   while (range = ranges.pop)
@@ -467,11 +467,11 @@
 #   map_i += 1
 # end
  
-# # puts "\nfinal ranges #{ranges.reverse.inspect}"
+# puts "\nfinal ranges #{ranges.reverse.inspect}"
  
 # puts ranges[-1].first
 
-# Day 6
+# # Day 6
 # INPUT = 'day6.txt'
 
 # def times
@@ -490,7 +490,7 @@
 #   File.readlines(INPUT)[1].gsub('Distance:', '').gsub(' ', '').to_i
 # end
 
-# # return an array containing ranges of every winning time for each race by zipping
+# return an array containing ranges of every winning time for each race by zipping
 # def get_all_winning_times(times, distances)
 #   races = []
 #   times.zip(distances).each do |race|
@@ -499,8 +499,8 @@
 #   races
 # end
 
-# # get the winning times
-# # this is the quadratic formula, but i fucked it up beyond recognition to satisfy rubocop...
+# get the winning times
+# this is the quadratic formula, but i fucked it up beyond recognition to satisfy rubocop...
 # def get_winning_times(time, distance)
 #   a = time**2
 #   b = Math.sqrt(a - 4 * -1.0 * -distance)
@@ -522,13 +522,13 @@
 #   times.last - times.first - 1
 # end
 
-# # part 1 answer
+# part 1 answer
 # puts multiply_amount_winning_times
 
-# # part 2 answer
+# part 2 answer
 # puts amount_winning_times
 
-# Day 7
+# # Day 7
 # order = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'].reverse
 # predicates = [:is_five_of_a_kind?, :is_four_of_a_kind?, :is_full_house?, :is_three_of_a_kind?, :is_two_pair?, :is_one_pair?, :is_high_card?].reverse
 
@@ -613,7 +613,7 @@
 # hands.each_with_index { |h, idx| sum += (idx + 1) * h[1] }
 # puts sum
 
-# Day 8
+# # Day 8
 
 # left_right = files.split("\n")[0]
 # coordinates = files.split("\n")[2..-1]
@@ -706,7 +706,7 @@ end
 # puts steps.reduce(1, :lcm)
 
 
-# Day 9
+# # Day 9
 # lines = File.readlines("day9.txt").map { |x| x.split(" ").map(&:to_i) }
 
 # def solve(puzzles)
@@ -723,7 +723,7 @@ end
 # puts solve(lines)
 # puts solve(lines.map(&:reverse))
 
-# Day 10
+# # Day 10
 # require 'pp'
  
 # input = File.readlines(ARGV[0] || 'day10.txt').map(&:rstrip)
@@ -737,37 +737,37 @@ end
 #   end
 # end
  
-# # puts "start at #{start_row}, #{start_col}"
+# puts "start at #{start_row}, #{start_col}"
  
 # width = input[0].length
 # height = input.length
  
-# # start by searching cardinal directions clockwise beacuse we don't
-# # know what shape pipe 'S' is
+# start by searching cardinal directions clockwise beacuse we don't
+# know what shape pipe 'S' is
 # paths = []
  
-# # up
+# up
 # r, c = start_row-1, start_col
 # if r >= 0 && r < height && c >= 0 && c < width
 #   if '|7F'.index(input[r][c])
 #     paths << [r, c]
 #   end
 # end
-# # right
+# right
 # r, c = start_row, start_col+1
 # if r >= 0 && r < height && c >= 0 && c < width
 #   if '-J7'.index(input[r][c])
 #     paths << [r, c]
 #   end
 # end
-# # down
+# down
 # r, c = start_row+1, start_col
 # if r >= 0 && r < height && c >= 0 && c < width
 #   if '|LJ'.index(input[r][c])
 #     paths << [r, c]
 #   end
 # end
-# # left
+# left
 # r, c = start_row, start_col-1
 # if r >= 0 && r < height && c >= 0 && c < width
 #   if '-LF'.index(input[r][c])
@@ -777,7 +777,7 @@ end
  
 # p paths
  
-# # clean up map
+# clean up map
 # clean = [nil] * height
 # height.times { clean[_1] = '.' * width}
  
@@ -818,9 +818,9 @@ end
 # end
  
 # puts
-# # clean.each {puts _1}
+# clean.each {puts _1}
  
-# # now, follow both paths simultaneously until
+# now, follow both paths simultaneously until
 # counts = [nil] * height
 # height.times { counts[_1] = '.' * width}
 # counts[start_row][start_col] = '0'
@@ -829,7 +829,7 @@ end
 # n = 1
 # max = 0
 # loop do
-# #   puts "at #{paths[0].join(', ')} | #{paths[1].join(', ')}"
+#   puts "at #{paths[0].join(', ')} | #{paths[1].join(', ')}"
 #   nxt = paths.map do |at|
 #     visited[at] = true
 #     r, c = at
@@ -864,8 +864,8 @@ end
 #     # puts "at #{at} -> #{take}"
 #     take
 #   end
-# #   print "nxt: "
-# #   p nxt
+#   print "nxt: "
+#   p nxt
  
 #   break if nxt.all?{_1 == nil}
 #   paths = nxt
@@ -900,12 +900,12 @@ end
 # $height = input.length
 # puts "#{$width} x #{$height} = #{$width*$height}"
  
-# # start by searching cardinal directions clockwise beacuse we don't
-# # know what shape pipe 'S' is
+# start by searching cardinal directions clockwise beacuse we don't
+# know what shape pipe 'S' is
 # paths = []
 # go = []
  
-# # up
+# up
 # r, c = start_row-1, start_col
 # if r >= 0 && r < $height && c >= 0 && c < $width
 #   if '|7F'.index(input[r][c])
@@ -913,7 +913,7 @@ end
 #     go << :up
 #   end
 # end
-# # right
+# right
 # r, c = start_row, start_col+1
 # if r >= 0 && r < $height && c >= 0 && c < $width
 #   if '-J7'.index(input[r][c])
@@ -921,7 +921,7 @@ end
 #     go << :rt
 #   end
 # end
-# # down
+# down
 # r, c = start_row+1, start_col
 # if r >= 0 && r < $height && c >= 0 && c < $width
 #   if '|LJ'.index(input[r][c])
@@ -929,7 +929,7 @@ end
 #     go << :dn
 #   end
 # end
-# # left
+# left
 # r, c = start_row, start_col-1
 # if r >= 0 && r < $height && c >= 0 && c < $width
 #   if '-LF'.index(input[r][c])
@@ -951,7 +951,7 @@ end
 #   end
 # puts "s is #{s_is}"
  
-# # clean up map
+# clean up map
 # clean = [nil] * $height
 # $height.times { clean[_1] = '.' * $width}
 # clean[start_row][start_col] = 'S'
@@ -1000,7 +1000,7 @@ end
  
  
 # =begin
-# # flood fill '.'s from outside
+# flood fill '.'s from outside
 # queue = [[0,0]]
 # until queue.empty?
 #   r, c = queue.pop
@@ -1028,7 +1028,7 @@ end
 # =end
  
 # =begin
-# # count remaining '.'s
+# count remaining '.'s
 # ndots = 0
 # clean.each do |line|
 #   line.each_char {|c| ndots += 1 if c == '.'}
@@ -1036,7 +1036,7 @@ end
 # puts "\n#{ndots} dots remain"
 # =end
  
-# # apply (simplified?) even-odd winding rule
+# apply (simplified?) even-odd winding rule
  
 # unwound = []
  
@@ -1080,12 +1080,12 @@ end
 #   unwound << u
 # end
  
-# # puts "\nApply even-odd rule:"
-# # unwound.each {puts(_1.gsub('.', "\e[94m@\e[0m"))}
+# puts "\nApply even-odd rule:"
+# unwound.each {puts(_1.gsub('.', "\e[94m@\e[0m"))}
  
 # puts "\n#{internal} still inside"
  
-# # puts "\nRemap:"
+# puts "\nRemap:"
 # symbols = [
 #   ['F', "\u250F"],
 #   ['J', "\u251B"],
@@ -1102,7 +1102,7 @@ end
 # end
 
 
-# Day 11 - change the 1000000 to 2 for part 1 answer
+# # Day 11 - change the 1000000 to 2 for part 1 answer
 # rows = File.readlines('day11.txt').map(&:chomp).map(&:chars)
 # inflated_y, inflated_x = [rows, rows.transpose].map { |xs|
 #   xs.reduce([]) { |inflated, col|
@@ -1127,7 +1127,7 @@ end
 # puts result
 
 
-# Day 12
+# # Day 12
 # Part 1
 # def solve(chars, seq)
 #   unknowns = chars.each_with_index.filter_map { |c, i| i if c == '?' }
@@ -1281,7 +1281,7 @@ end
 #   }.sum
 
 
-# Day 13
+# # Day 13
 # # Day 13
 # INPUT = "day13.txt"
  
@@ -1338,58 +1338,58 @@ end
 # puts "Part 1 #{ans1}"
 # puts "Part 2 #{ans2}"
 
-# Day 14
-def tilt_north(data)
-    data = data.map(&:dup)
-    (0...data.size).each { |y|
-      (0...data[0].size).each { |x|
-        next unless data[y][x] == 'O'
-        new_y = (0...y).reverse_each.lazy.
-          take_while { data[_1][x] == '.' }.reduce { _2 }
-        if new_y
-          data[new_y][x] = 'O'
-          data[y][x] = '.'
-        end
-      }
-    }
-    data
-  end
+# # Day 14
+# def tilt_north(data)
+#     data = data.map(&:dup)
+#     (0...data.size).each { |y|
+#       (0...data[0].size).each { |x|
+#         next unless data[y][x] == 'O'
+#         new_y = (0...y).reverse_each.lazy.
+#           take_while { data[_1][x] == '.' }.reduce { _2 }
+#         if new_y
+#           data[new_y][x] = 'O'
+#           data[y][x] = '.'
+#         end
+#       }
+#     }
+#     data
+#   end
   
-  def north_load(data)
-    (0...data.size).lazy.filter_map { |y|
-      (0...data[0].size).lazy.filter_map { |x|
-        data.size - y if data[y][x] == 'O'
-      }.sum
-    }.sum
-  end
+#   def north_load(data)
+#     (0...data.size).lazy.filter_map { |y|
+#       (0...data[0].size).lazy.filter_map { |x|
+#         data.size - y if data[y][x] == 'O'
+#       }.sum
+#     }.sum
+#   end
 
 # data = File.open("day14.txt").readlines(chomp: true)
 # puts north_load(tilt_north(data))
 
-def transpose(data) = data.map(&:chars).transpose.map(&:join)
-def reverse(data) = data.reverse
+# def transpose(data) = data.map(&:chars).transpose.map(&:join)
+# def reverse(data) = data.reverse
 
-def tilt_south(data) = reverse tilt_north reverse data
-def tilt_west(data) = transpose tilt_north transpose data
-def tilt_east(data) = transpose reverse tilt_north reverse transpose data
-def cycle(data) = tilt_east tilt_south tilt_west tilt_north data
+# def tilt_south(data) = reverse tilt_north reverse data
+# def tilt_west(data) = transpose tilt_north transpose data
+# def tilt_east(data) = transpose reverse tilt_north reverse transpose data
+# def cycle(data) = tilt_east tilt_south tilt_west tilt_north data
 
-def cycles(data, n)
-  seq = [data]
-  cycle_begin = 0
-  loop do
-    data = cycle(data)
-    idx = seq.index(data)
-    if !idx.nil?
-      cycle_begin = idx
-      break
-    end
-    seq << data
-  end
-  return seq[n] if n < cycle_begin
-  seq[cycle_begin + ((n - cycle_begin) % (seq.size - cycle_begin))]
-end
+# def cycles(data, n)
+#   seq = [data]
+#   cycle_begin = 0
+#   loop do
+#     data = cycle(data)
+#     idx = seq.index(data)
+#     if !idx.nil?
+#       cycle_begin = idx
+#       break
+#     end
+#     seq << data
+#   end
+#   return seq[n] if n < cycle_begin
+#   seq[cycle_begin + ((n - cycle_begin) % (seq.size - cycle_begin))]
+# end
 
-data = File.open("day14.txt").readlines(chomp: true)
-data = cycles(data, 1000000000)
-puts north_load(data)
+# data = File.open("day14.txt").readlines(chomp: true)
+# data = cycles(data, 1000000000)
+# puts north_load(data)
