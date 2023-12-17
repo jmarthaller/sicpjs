@@ -110,3 +110,193 @@
 //     ctx.fillStyle = (v == 1 ? '#000' : (mazeDist[y][x] === undefined ? '#f00' : '#00f' ));
 //     ctx.fillRect(x*zoom, y*zoom, zoom, zoom);
 // }))
+
+// Day 16
+// (function() {
+// 	let lines = document.body.textContent.trim().split('\n');
+// 	let n = 0;
+
+// 	function go(dt=50) {
+// 		let id = ++n;
+// 		let energised = 0;
+// 		let done = false;
+
+// 		document.body.innerHTML = '';
+// 		let div = document.createElement('div');
+// 		let title = document.createElement('h1');
+// 		let i = 0;
+// 		let spinner = "";
+// 		let spinnerUpdate = setInterval(() => {
+// 			spinner = "|/-\\"[i++ % 4];
+// 		}, 500)
+// 		let titleUpdate = setInterval(() => {
+// 			title.textContent = done
+// 				? `Energised ${energised} tiles in total. All done.`
+// 				: `Energised ${energised} tiles so far... ${spinner}`;
+// 			if (done || n !== id) {
+// 				clearInterval(titleUpdate);
+// 				clearInterval(spinnerUpdate);
+// 				return;
+// 			}
+// 		}, Math.max(200, dt));
+// 		title.style = `
+// 			color: #ffff66;
+// 			text-shadow: 0 0 5px #ffff66;
+// 		`;
+// 		document.body.appendChild(title);
+// 		document.body.appendChild(div);
+// 		document.body.style = `
+// 			background: #0f0f23;
+// 		`;
+// 		div.style = `
+// 			position: relative;
+// 			color: #009900;
+// 			text-shadow: 0 0 5px #009900;
+// 			line-height: 8px;
+// 			font-size: 8px;
+// 			text-align: center;
+// 		`;
+// 		let G = lines.map((l, y) => Array.from(l).map((c, x) => {
+// 			let s = document.createElement('div');
+// 			s.textContent = c == '.' ? '' : c;
+// 			s.style = `
+// 				overflow: hidden;
+// 				width: 8px;
+// 				height: 8px;
+// 				position: absolute;
+// 				top: ${8 * y}px;
+// 				left: ${8 * x}px;
+// 			`;
+// 			div.appendChild(s);
+// 			return { elem: s, char: c, seen: 0 };
+// 		}));
+
+// 		let seen = new Set();
+// 		let todo = 0;
+
+// 		function step(y, x, dy, dx) {
+// 			let p = G[y += dy]?.[x += dx];
+// 			if (!p || n !== id) {
+// 				return;
+// 			}
+// 			let key = `${x},${y},${dy},${dx}`;
+// 			if (!p.seen) {
+// 				energised++;
+// 			}
+// 			if (p.seen++ < 10) {
+// 				p.elem.style.setProperty('background', `hsl(60 100% ${10 * p.seen}%)`);
+// 			} else if (seen.has(key)) {
+// 				return;
+// 			}
+// 			seen.add(key);
+
+// 			todo++;
+// 			let c = p.char;
+// 			setTimeout(() => {
+// 				let reflect = (c == '\\') - (c == '/');
+// 				if (reflect) {
+// 					step(y, x, dx*reflect, dy*reflect);
+// 				} else if ((c == '|' && dx) || (c == '-' && dy)) {
+// 					step(y, x, -dx, dy);
+// 					step(y, x, dx, -dy);
+// 				} else {
+// 					step(y, x, dy, dx);
+// 				}
+// 				if (!--todo) {
+// 					done = true;
+// 				}
+// 			}, dt);
+// 		}
+
+// 		step(0, -1, 0, 1);
+// 	}
+
+// 	window.go = go;
+// })();
+
+const fs = require('node:fs');
+let answer = 0;
+try {
+    const input = fs.readFileSync('day16.txt', 'utf8').trim();
+    const grid = input.split("\r\n").map((row) => row.split(""));
+
+    let starts = [];
+    for(let c = 0; c < grid[0].length; c++) {
+        starts.push({col:c,row:0,dir:180});
+        starts.push({col:c,row:grid.length-1,dir:0});
+    }
+    for(let r = 0; r < grid.length; r++) {
+        starts.push({col:0,row:r,dir:90});
+        starts.push({col:grid[0].length-1,row:r,dir:270});
+    }
+    starts.forEach((start) => {
+        let shift = [];
+        shift[0]   = [-1, 0];
+        shift[90]  = [ 0, 1];
+        shift[180] = [ 1, 0];
+        shift[270] = [ 0,-1];
+        let nodes = new Map();
+        let output = [...Array(grid.length)].map(_=>Array(grid[0].length).fill("."));  
+        let queue = [start];
+        while(queue.length > 0) {
+            let check = queue.pop();
+            let row = check.row;
+            let col = check.col;
+            let dir = check.dir;
+            let key = `${row}/${col}/${dir}`;
+            if(nodes.has(key)) {
+                //do nothing, already have this
+                //console.log('Hit mapping',check);
+                continue;
+            }
+            nodes.set(key, 1);
+            if(row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) {
+                //out of bounds, end;
+                //console.log('Out of bounds', check);
+            }
+            else {
+                let cell = grid[row][col];
+                let newdirs = [];
+                output[row][col] = '#';
+                if(cell == "|" && (dir == 90 || dir == 270)) {
+                    newdirs = [0,180];
+                }
+                else if(cell == "-" && (dir == 0 || dir == 180)) {
+                    newdirs = [90,270];
+                }
+                else if(cell == "/") {
+                    switch(dir) {
+                        case 0: newdirs = [90]; break;
+                        case 90: newdirs = [0]; break;
+                        case 180: newdirs = [270]; break;
+                        case 270: newdirs = [180]; break;
+                    }
+                }
+                else if(cell == "\\") {
+                    switch(dir) {
+                        case 0: newdirs = [270]; break;
+                        case 90: newdirs = [180]; break;
+                        case 180: newdirs = [90]; break;
+                        case 270: newdirs = [0]; break;
+                    }
+                }
+                else { //if(cell == ".") {
+                    newdirs = [dir];
+                    //pass through in same direction
+                }
+                newdirs.forEach((newdir) => queue.push({col:col+shift[newdir][1],row:row+shift[newdir][0],dir:newdir}));
+
+            }
+        }
+        //let temp = output.map((row) => row.join("")).join("\n");
+        //console.log(temp);
+        let startanswer = output.flat().filter((x) => x == '#').length;
+        console.log(start,startanswer);
+        answer = Math.max(startanswer, answer);
+    });
+}
+catch(e) {
+    console.error(e);
+}
+
+console.log("The answer is:", answer);

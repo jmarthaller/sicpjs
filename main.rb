@@ -1395,16 +1395,55 @@ end
 # puts north_load(data)
 
 # Day 15
-input = File.read("day15.txt").tr("\r\n", '').split(',')
-hash = ->(l) { l.bytes.reduce(0) { (_1 + _2) * 17 % 256 } }
+# input = File.read("day15.txt").tr("\r\n", '').split(',')
+# hash = ->(l) { l.bytes.reduce(0) { (_1 + _2) * 17 % 256 } }
 
-boxes = {}
-input.map do |l|
-    lbl, op = l.split(/[=-]/)
-    box = boxes[1 + hash[lbl]] ||= []
-    i = box.index { _1[0] == lbl } || box.size
-    op ? box[i] = [lbl, op.to_i] : box.delete_at(i)
+# boxes = {}
+# input.map do |l|
+#     lbl, op = l.split(/[=-]/)
+#     box = boxes[1 + hash[lbl]] ||= []
+#     i = box.index { _1[0] == lbl } || box.size
+#     op ? box[i] = [lbl, op.to_i] : box.delete_at(i)
+# end
+
+# puts "Part 1: #{input.sum(&hash)}"
+# puts "Part 2: #{boxes.sum { |(i, b)| i * b.map.with_index.sum { |l, j| -~j * l[1] } }}"
+
+# Day 16
+# w = world, start = [ position, direction ]
+def run(w, start)
+  beams, visited = [start], Set.new
+  until beams.empty?
+    beams = beams.map do |p, d|
+      p = p.zip(d).map(&:sum)
+      next if !w[p]
+      next if visited.include?([p, d])
+      visited << [p, d]
+
+      cw, ccw = [-d[1], d[0]], [d[1], -d[0]]
+      ds = case w[p]
+      when "." then [d]
+      when "\\" then [d.reverse]
+      when "/" then [d.reverse.map { _1 * -1 }]
+      when "|" then (d[1] == 0) ? [d] : [cw, ccw]
+      when "-" then (d[0] == 0) ? [d] : [cw, ccw]
+      end
+      ds.map { [p, _1] }
+    end.compact.flatten(1)
+  end
+  visited.map(&:first).uniq.length
 end
 
-puts "Part 1: #{input.sum(&hash)}"
-puts "Part 2: #{boxes.sum { |(i, b)| i * b.map.with_index.sum { |l, j| -~j * l[1] } }}"
+# p1
+p run(w, [[0, -1], [0, 1]])
+
+# p2
+p2 = (0...len).map do
+  [
+    [[len, _1], [-1, 0]], # n
+    [[_1, len], [0, -1]], # w
+    [[-1,  _1], [1,  0]], # s
+    [[_1,  -1], [0,  1]], # e
+  ]
+end.flatten(1).map { run(w, _1) }.max
+p p2
