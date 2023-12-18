@@ -1410,40 +1410,130 @@ end
 # puts "Part 2: #{boxes.sum { |(i, b)| i * b.map.with_index.sum { |l, j| -~j * l[1] } }}"
 
 # Day 16
-# w = world, start = [ position, direction ]
-def run(w, start)
-  beams, visited = [start], Set.new
-  until beams.empty?
-    beams = beams.map do |p, d|
-      p = p.zip(d).map(&:sum)
-      next if !w[p]
-      next if visited.include?([p, d])
-      visited << [p, d]
+class FileReader
+  class << self
+    def read_file(path)
+      File.read(path.strip)
+    end
 
-      cw, ccw = [-d[1], d[0]], [d[1], -d[0]]
-      ds = case w[p]
-      when "." then [d]
-      when "\\" then [d.reverse]
-      when "/" then [d.reverse.map { _1 * -1 }]
-      when "|" then (d[1] == 0) ? [d] : [cw, ccw]
-      when "-" then (d[0] == 0) ? [d] : [cw, ccw]
+    def for_each_line(path, no_strip: false)
+      File.readlines(path).each do |line|
+        line = line.strip unless no_strip
+        yield(line)
       end
-      ds.map { [p, _1] }
-    end.compact.flatten(1)
+    end
+
+    def for_each_line_with_index(path, no_strip: false)
+      idx = 0
+      File.readlines(path).each do |line|
+        line = line.strip unless no_strip
+        yield(line, idx)
+        idx += 1
+      end
+    end
   end
-  visited.map(&:first).uniq.length
 end
+def run(path, _)
+  directions = {
+    up: lambda do |map, x, y|
+          (y - 1).downto(0).each do |id|
+            break if map["#{x}:#{id}"].nil?
+            return [x, id] if map["#{x}:#{id}"][:content] != '.'
 
-# p1
-p run(w, [[0, -1], [0, 1]])
+            map["#{x}:#{id}"][:visited] += 1
+          end
+          [x, 0]
+        end,
+    down: lambda do |map, x, y|
+            ((y + 1)..120).each do |id|
+              break if map["#{x}:#{id}"].nil?
+              return [x, id] if map["#{x}:#{id}"][:content] != '.'
 
-# p2
-p2 = (0...len).map do
-  [
-    [[len, _1], [-1, 0]], # n
-    [[_1, len], [0, -1]], # w
-    [[-1,  _1], [1,  0]], # s
-    [[_1,  -1], [0,  1]], # e
-  ]
-end.flatten(1).map { run(w, _1) }.max
-p p2
+              map["#{x}:#{id}"][:visited] += 1
+            end
+            [x, 120]
+          end,
+    left: lambda do |map, x, y|
+            (x - 1).downto(0).each do |id|
+              break if map["#{id}:#{y}"].nil?
+              return [id, y] if map["#{id}:#{y}"][:content] != '.'
+
+              map["#{id}:#{y}"][:visited] += 1
+            end
+            [0, y]
+          end,
+    right: lambda do |map, x, y|
+             ((x + 1)..120).each do |id|
+               break if map["#{id}:#{y}"].nil?
+               return [id, y] if map["#{id}:#{y}"][:content] != '.'
+
+               map["#{id}:#{y}"][:visited] += 1
+             end
+             [120, y]
+           end
+  }
+  reflections = {
+    '\\' => { right: [:down], down: [:right], left: [:up], up: [:left] },
+    '/' => { right: [:up], down: [:left], left: [:down], up: [:right] },
+    '|' => { left: %i[up down], up: [], right: %i[up down], down: [] },
+    '-' => { left: [], up: %i[right left], right: [], down: %i[right left] }
+  }
+  map = {}
+  x_max = 0
+  y_max = 0
+  FileReader.for_each_line_with_index(path) do |line, y|
+    line.chars.each_with_index do |char, x|
+      map["#{x}:#{y}"] = { content: char, visited: 0 }
+      x_max = x
+    end
+    y_max = y
+  end
+
+  counts = []
+
+  (0..x_max).each do |x|
+    new_map = Marshal.load(Marshal.dump(map))
+    walk(new_map, directions, reflections, x, 0, :down, {})
+    counts << new_map.values.select { |v| v[:visited].positive? }.count
+    new_map = Marshal.load(Marshal.dump(map))
+    walk(new_map, directions, reflections, x, y_max, :up, {})
+    counts << new_map.values.select { |v| v[:visited].positive? }.count
+  end
+
+  (0..y_max).each do |y|
+    new_map = Marshal.load(Marshal.dump(map))
+    walk(new_map, directions, reflections, 0, y, :right, {})
+    counts << new_map.values.select { |v| v[:visited].positive? }.count
+    new_map = Marshal.load(Marshal.dump(map))
+    walk(new_map, directions, reflections, x_max, y, :left, {})
+    counts << new_map.values.select { |v| v[:visited].positive? }.count
+  end
+
+  counts.max
+end
+def walk(map, directions, reflections, x, y, dir, visited)
+  return unless visited["#{x}:#{y}:#{dir}"].nil?
+
+  visited["#{x}:#{y}:#{dir}"] = 1
+  coords = "#{x}:#{y}"
+  return if map[coords].nil?
+
+  map_content = map[coords][:content]
+  map[coords][:visited] += 1
+
+  if map_content == '.' || reflections[map_content][dir].count.zero?
+    x_new, y_new = directions[dir].(map, x, y)
+    walk(map, directions, reflections, x_new, y_new, dir, visited)
+  else
+    dir1, dir2 = reflections[map_content][dir]
+    unless dir1.nil?
+      x_new, y_new = directions[dir1].(map, x, y)
+      walk(map, directions, reflections, x_new, y_new, dir1, visited)
+    end
+    unless dir2.nil?
+      x_new, y_new = directions[dir2].(map, x, y)
+      walk(map, directions, reflections, x_new, y_new, dir2, visited)
+    end
+  end
+end
+puts run('day16.txt', nil)
