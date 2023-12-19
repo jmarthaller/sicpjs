@@ -1410,130 +1410,201 @@ end
 # puts "Part 2: #{boxes.sum { |(i, b)| i * b.map.with_index.sum { |l, j| -~j * l[1] } }}"
 
 # Day 16
-class FileReader
-  class << self
-    def read_file(path)
-      File.read(path.strip)
-    end
+# class FileReader
+#   class << self
+#     def read_file(path)
+#       File.read(path.strip)
+#     end
 
-    def for_each_line(path, no_strip: false)
-      File.readlines(path).each do |line|
-        line = line.strip unless no_strip
-        yield(line)
+#     def for_each_line(path, no_strip: false)
+#       File.readlines(path).each do |line|
+#         line = line.strip unless no_strip
+#         yield(line)
+#       end
+#     end
+
+#     def for_each_line_with_index(path, no_strip: false)
+#       idx = 0
+#       File.readlines(path).each do |line|
+#         line = line.strip unless no_strip
+#         yield(line, idx)
+#         idx += 1
+#       end
+#     end
+#   end
+# end
+# def run(path, _)
+#   directions = {
+#     up: lambda do |map, x, y|
+#           (y - 1).downto(0).each do |id|
+#             break if map["#{x}:#{id}"].nil?
+#             return [x, id] if map["#{x}:#{id}"][:content] != '.'
+
+#             map["#{x}:#{id}"][:visited] += 1
+#           end
+#           [x, 0]
+#         end,
+#     down: lambda do |map, x, y|
+#             ((y + 1)..120).each do |id|
+#               break if map["#{x}:#{id}"].nil?
+#               return [x, id] if map["#{x}:#{id}"][:content] != '.'
+
+#               map["#{x}:#{id}"][:visited] += 1
+#             end
+#             [x, 120]
+#           end,
+#     left: lambda do |map, x, y|
+#             (x - 1).downto(0).each do |id|
+#               break if map["#{id}:#{y}"].nil?
+#               return [id, y] if map["#{id}:#{y}"][:content] != '.'
+
+#               map["#{id}:#{y}"][:visited] += 1
+#             end
+#             [0, y]
+#           end,
+#     right: lambda do |map, x, y|
+#              ((x + 1)..120).each do |id|
+#                break if map["#{id}:#{y}"].nil?
+#                return [id, y] if map["#{id}:#{y}"][:content] != '.'
+
+#                map["#{id}:#{y}"][:visited] += 1
+#              end
+#              [120, y]
+#            end
+#   }
+#   reflections = {
+#     '\\' => { right: [:down], down: [:right], left: [:up], up: [:left] },
+#     '/' => { right: [:up], down: [:left], left: [:down], up: [:right] },
+#     '|' => { left: %i[up down], up: [], right: %i[up down], down: [] },
+#     '-' => { left: [], up: %i[right left], right: [], down: %i[right left] }
+#   }
+#   map = {}
+#   x_max = 0
+#   y_max = 0
+#   FileReader.for_each_line_with_index(path) do |line, y|
+#     line.chars.each_with_index do |char, x|
+#       map["#{x}:#{y}"] = { content: char, visited: 0 }
+#       x_max = x
+#     end
+#     y_max = y
+#   end
+
+#   counts = []
+
+#   (0..x_max).each do |x|
+#     new_map = Marshal.load(Marshal.dump(map))
+#     walk(new_map, directions, reflections, x, 0, :down, {})
+#     counts << new_map.values.select { |v| v[:visited].positive? }.count
+#     new_map = Marshal.load(Marshal.dump(map))
+#     walk(new_map, directions, reflections, x, y_max, :up, {})
+#     counts << new_map.values.select { |v| v[:visited].positive? }.count
+#   end
+
+#   (0..y_max).each do |y|
+#     new_map = Marshal.load(Marshal.dump(map))
+#     walk(new_map, directions, reflections, 0, y, :right, {})
+#     counts << new_map.values.select { |v| v[:visited].positive? }.count
+#     new_map = Marshal.load(Marshal.dump(map))
+#     walk(new_map, directions, reflections, x_max, y, :left, {})
+#     counts << new_map.values.select { |v| v[:visited].positive? }.count
+#   end
+
+#   counts.max
+# end
+# def walk(map, directions, reflections, x, y, dir, visited)
+#   return unless visited["#{x}:#{y}:#{dir}"].nil?
+
+#   visited["#{x}:#{y}:#{dir}"] = 1
+#   coords = "#{x}:#{y}"
+#   return if map[coords].nil?
+
+#   map_content = map[coords][:content]
+#   map[coords][:visited] += 1
+
+#   if map_content == '.' || reflections[map_content][dir].count.zero?
+#     x_new, y_new = directions[dir].(map, x, y)
+#     walk(map, directions, reflections, x_new, y_new, dir, visited)
+#   else
+#     dir1, dir2 = reflections[map_content][dir]
+#     unless dir1.nil?
+#       x_new, y_new = directions[dir1].(map, x, y)
+#       walk(map, directions, reflections, x_new, y_new, dir1, visited)
+#     end
+#     unless dir2.nil?
+#       x_new, y_new = directions[dir2].(map, x, y)
+#       walk(map, directions, reflections, x_new, y_new, dir2, visited)
+#     end
+#   end
+# end
+# puts run('day16.txt', nil)
+
+
+
+# Day 17
+require_relative 'skim'
+require_relative 'search'
+
+class SearchNode < Search::Node
+  attr_accessor :map, :x, :y, :from_dir, :from_count
+  def initialize(map, x, y, from_dir = nil, from_count = 0)
+    self.map = map
+    self.x = x
+    self.y = y
+    self.from_dir = from_dir
+    self.from_count = from_count
+  end
+
+  def fuzzy_equal?(other)
+    x == other.x && y == other.y
+  end
+
+  def est_cost(other)
+    (other.x - x).abs + (other.y - y).abs
+  end
+
+  def backtrack?(from_dir, to_dir)
+    case from_dir
+    when :l then to_dir == :r
+    when :u then to_dir == :d
+    when :r then to_dir == :l
+    when :d then to_dir == :u
+    end
+  end
+
+  def do_edge(dir, x1, y1)
+    return if backtrack?(from_dir, dir)
+    unless from_dir.nil?
+      if from_dir == dir
+        return if from_count >= 10
+      else
+        return if from_count < 4
       end
     end
 
-    def for_each_line_with_index(path, no_strip: false)
-      idx = 0
-      File.readlines(path).each do |line|
-        line = line.strip unless no_strip
-        yield(line, idx)
-        idx += 1
-      end
-    end
+    yield [map[x1, y1].to_i, SearchNode.new(map, x1, y1, dir, from_dir == dir ? from_count + 1 : 1)]
+  end
+
+  def enum_edges(&)
+    do_edge(:l, x - 1, y, &) if x > 0
+    do_edge(:u, x, y - 1, &) if y > 0
+    do_edge(:r, x + 1, y, &) if x < map.width - 1
+    do_edge(:d, x, y + 1, &) if y < map.height - 1
+  end
+
+  def hash
+    [x, y, from_dir, from_count].join('/').hash
   end
 end
-def run(path, _)
-  directions = {
-    up: lambda do |map, x, y|
-          (y - 1).downto(0).each do |id|
-            break if map["#{x}:#{id}"].nil?
-            return [x, id] if map["#{x}:#{id}"][:content] != '.'
 
-            map["#{x}:#{id}"][:visited] += 1
-          end
-          [x, 0]
-        end,
-    down: lambda do |map, x, y|
-            ((y + 1)..120).each do |id|
-              break if map["#{x}:#{id}"].nil?
-              return [x, id] if map["#{x}:#{id}"][:content] != '.'
 
-              map["#{x}:#{id}"][:visited] += 1
-            end
-            [x, 120]
-          end,
-    left: lambda do |map, x, y|
-            (x - 1).downto(0).each do |id|
-              break if map["#{id}:#{y}"].nil?
-              return [id, y] if map["#{id}:#{y}"][:content] != '.'
+map = Skim.read
+start_node = SearchNode.new(map, 0, 0)
+end_node = SearchNode.new(map, map.width - 1, map.height - 1)
+cost, path = Search::a_star(start_node, end_node)
 
-              map["#{id}:#{y}"][:visited] += 1
-            end
-            [0, y]
-          end,
-    right: lambda do |map, x, y|
-             ((x + 1)..120).each do |id|
-               break if map["#{id}:#{y}"].nil?
-               return [id, y] if map["#{id}:#{y}"][:content] != '.'
-
-               map["#{id}:#{y}"][:visited] += 1
-             end
-             [120, y]
-           end
-  }
-  reflections = {
-    '\\' => { right: [:down], down: [:right], left: [:up], up: [:left] },
-    '/' => { right: [:up], down: [:left], left: [:down], up: [:right] },
-    '|' => { left: %i[up down], up: [], right: %i[up down], down: [] },
-    '-' => { left: [], up: %i[right left], right: [], down: %i[right left] }
-  }
-  map = {}
-  x_max = 0
-  y_max = 0
-  FileReader.for_each_line_with_index(path) do |line, y|
-    line.chars.each_with_index do |char, x|
-      map["#{x}:#{y}"] = { content: char, visited: 0 }
-      x_max = x
-    end
-    y_max = y
-  end
-
-  counts = []
-
-  (0..x_max).each do |x|
-    new_map = Marshal.load(Marshal.dump(map))
-    walk(new_map, directions, reflections, x, 0, :down, {})
-    counts << new_map.values.select { |v| v[:visited].positive? }.count
-    new_map = Marshal.load(Marshal.dump(map))
-    walk(new_map, directions, reflections, x, y_max, :up, {})
-    counts << new_map.values.select { |v| v[:visited].positive? }.count
-  end
-
-  (0..y_max).each do |y|
-    new_map = Marshal.load(Marshal.dump(map))
-    walk(new_map, directions, reflections, 0, y, :right, {})
-    counts << new_map.values.select { |v| v[:visited].positive? }.count
-    new_map = Marshal.load(Marshal.dump(map))
-    walk(new_map, directions, reflections, x_max, y, :left, {})
-    counts << new_map.values.select { |v| v[:visited].positive? }.count
-  end
-
-  counts.max
+vis = Skim.new(map.width, map.height, '.')
+path.each do |node|
+  vis[node.x, node.y] = '#'
 end
-def walk(map, directions, reflections, x, y, dir, visited)
-  return unless visited["#{x}:#{y}:#{dir}"].nil?
-
-  visited["#{x}:#{y}:#{dir}"] = 1
-  coords = "#{x}:#{y}"
-  return if map[coords].nil?
-
-  map_content = map[coords][:content]
-  map[coords][:visited] += 1
-
-  if map_content == '.' || reflections[map_content][dir].count.zero?
-    x_new, y_new = directions[dir].(map, x, y)
-    walk(map, directions, reflections, x_new, y_new, dir, visited)
-  else
-    dir1, dir2 = reflections[map_content][dir]
-    unless dir1.nil?
-      x_new, y_new = directions[dir1].(map, x, y)
-      walk(map, directions, reflections, x_new, y_new, dir1, visited)
-    end
-    unless dir2.nil?
-      x_new, y_new = directions[dir2].(map, x, y)
-      walk(map, directions, reflections, x_new, y_new, dir2, visited)
-    end
-  end
-end
-puts run('day16.txt', nil)
+vis.print
+puts cost
