@@ -1410,29 +1410,29 @@ end
 # puts "Part 2: #{boxes.sum { |(i, b)| i * b.map.with_index.sum { |l, j| -~j * l[1] } }}"
 
 # Day 16
-# class FileReader
-#   class << self
-#     def read_file(path)
-#       File.read(path.strip)
-#     end
+class FileReader
+  class << self
+    def read_file(path)
+      File.read(path.strip)
+    end
 
-#     def for_each_line(path, no_strip: false)
-#       File.readlines(path).each do |line|
-#         line = line.strip unless no_strip
-#         yield(line)
-#       end
-#     end
+    def for_each_line(path, no_strip: false)
+      File.readlines(path).each do |line|
+        line = line.strip unless no_strip
+        yield(line)
+      end
+    end
 
-#     def for_each_line_with_index(path, no_strip: false)
-#       idx = 0
-#       File.readlines(path).each do |line|
-#         line = line.strip unless no_strip
-#         yield(line, idx)
-#         idx += 1
-#       end
-#     end
-#   end
-# end
+    def for_each_line_with_index(path, no_strip: false)
+      idx = 0
+      File.readlines(path).each do |line|
+        line = line.strip unless no_strip
+        yield(line, idx)
+        idx += 1
+      end
+    end
+  end
+end
 # def run(path, _)
 #   directions = {
 #     up: lambda do |map, x, y|
@@ -1541,70 +1541,171 @@ end
 
 
 # Day 17
-require_relative 'skim'
-require_relative 'search'
+# require_relative 'skim'
+# require_relative 'search'
 
-class SearchNode < Search::Node
-  attr_accessor :map, :x, :y, :from_dir, :from_count
-  def initialize(map, x, y, from_dir = nil, from_count = 0)
-    self.map = map
-    self.x = x
-    self.y = y
-    self.from_dir = from_dir
-    self.from_count = from_count
-  end
+# class SearchNode < Search::Node
+#   attr_accessor :map, :x, :y, :from_dir, :from_count
+#   def initialize(map, x, y, from_dir = nil, from_count = 0)
+#     self.map = map
+#     self.x = x
+#     self.y = y
+#     self.from_dir = from_dir
+#     self.from_count = from_count
+#   end
 
-  def fuzzy_equal?(other)
-    x == other.x && y == other.y
-  end
+#   def fuzzy_equal?(other)
+#     x == other.x && y == other.y
+#   end
 
-  def est_cost(other)
-    (other.x - x).abs + (other.y - y).abs
-  end
+#   def est_cost(other)
+#     (other.x - x).abs + (other.y - y).abs
+#   end
 
-  def backtrack?(from_dir, to_dir)
-    case from_dir
-    when :l then to_dir == :r
-    when :u then to_dir == :d
-    when :r then to_dir == :l
-    when :d then to_dir == :u
+#   def backtrack?(from_dir, to_dir)
+#     case from_dir
+#     when :l then to_dir == :r
+#     when :u then to_dir == :d
+#     when :r then to_dir == :l
+#     when :d then to_dir == :u
+#     end
+#   end
+
+#   def do_edge(dir, x1, y1)
+#     return if backtrack?(from_dir, dir)
+#     unless from_dir.nil?
+#       if from_dir == dir
+#         return if from_count >= 10
+#       else
+#         return if from_count < 4
+#       end
+#     end
+
+#     yield [map[x1, y1].to_i, SearchNode.new(map, x1, y1, dir, from_dir == dir ? from_count + 1 : 1)]
+#   end
+
+#   def enum_edges(&)
+#     do_edge(:l, x - 1, y, &) if x > 0
+#     do_edge(:u, x, y - 1, &) if y > 0
+#     do_edge(:r, x + 1, y, &) if x < map.width - 1
+#     do_edge(:d, x, y + 1, &) if y < map.height - 1
+#   end
+
+#   def hash
+#     [x, y, from_dir, from_count].join('/').hash
+#   end
+# end
+
+# Day 18
+def self.run(path, input)
+  vis = false
+  x = 0
+  y = 0
+  x_max = 0
+  y_max = 0
+  x_min = 0
+  y_min = 0
+  map = {}
+  min_max = {}
+  map["#{x}:#{y}"] = 'F'
+  grid_size = (input == 'sample' ? 10 : 400)
+  grid = Array.new(grid_size) { Array.new(grid_size) { '.' } }
+  grid[input == 'sample' ? 0 : 78][0] = 'F'
+
+  corner_lookup = {
+    'DL' => 'J',
+    'LD' => 'F',
+    'RU' => 'J',
+    'UR' => 'F',
+    'DR' => 'l',
+    'RD' => '7',
+    'LU' => 'l',
+    'UL' => '7'
+  }
+
+  last_dir = 'R'
+  FileReader.for_each_line(path) do |line|
+    dir, dist, = line.gsub('(', '').gsub(')', '').split
+    dist.to_i.times do
+      unless corner_lookup["#{last_dir}#{dir}"].nil?
+        grid[y + (input == 'sample' ? 0 : 78)][x] = corner_lookup["#{last_dir}#{dir}"] if vis
+        map["#{x}:#{y}"] = corner_lookup["#{last_dir}#{dir}"]
+      end
+
+      y -= 1 if dir == 'U'
+      y += 1 if dir == 'D'
+      x -= 1 if dir == 'L'
+      x += 1 if dir == 'R'
+
+      x_max = x if x > x_max
+      y_max = y if y > y_max
+      x_min = x if x < x_min
+      y_min = y if y < y_min
+
+      if vis
+        grid[y + (input == 'sample' ? 0 : 78)][x] = dir unless x.zero? && y.zero?
+      end
+      map["#{x}:#{y}"] = dir unless x.zero? && y.zero?
+
+      if min_max[y].nil?
+        min_max[y] = { min: x, max: x }
+      else
+        min_max[y][:max] = x if x > min_max[y][:max]
+        min_max[y][:min] = x if x < min_max[y][:min]
+      end
+
+      last_dir = dir
     end
   end
 
-  def do_edge(dir, x1, y1)
-    return if backtrack?(from_dir, dir)
-    unless from_dir.nil?
-      if from_dir == dir
-        return if from_count >= 10
-      else
-        return if from_count < 4
+  inside = 0
+  (y_min..y_max).each do |y|
+    count = 0
+    ((min_max[y][:min] - 1)..(min_max[y][:max] + 1)).each do |x|
+      count += 1 if !map["#{x}:#{y}"].nil? && %w[U D J l].include?(map["#{x}:#{y}"])
+      next unless map["#{x}:#{y}"].nil?
+
+      if count.odd?
+        inside += 1
+        grid[y + (input == 'sample' ? 0 : 78)][x] = 'I' if vis
       end
     end
-
-    yield [map[x1, y1].to_i, SearchNode.new(map, x1, y1, dir, from_dir == dir ? from_count + 1 : 1)]
   end
 
-  def enum_edges(&)
-    do_edge(:l, x - 1, y, &) if x > 0
-    do_edge(:u, x, y - 1, &) if y > 0
-    do_edge(:r, x + 1, y, &) if x < map.width - 1
-    do_edge(:d, x, y + 1, &) if y < map.height - 1
-  end
+  Visualisation.print_grid(grid, centre_x: (input == 'sample' ? 5 : 200), centre_y: (input == 'sample' ? 5 : 200), x_dim: (input == 'sample' ? 10 : 400), y_dim: (input == 'sample' ? 10 : 400), sleep: 0.01, spacer: '', empty_char: '.', no_clear: true, character_colours: { 'I' => :red }) if vis
 
-  def hash
-    [x, y, from_dir, from_count].join('/').hash
-  end
+  inside + map.count
 end
+puts run("day18.txt", nil)
 
+def self.run(path, _)
+  points = [[0, 0]]
+  boundry_points = 0
+  FileReader.for_each_line(path) do |line|
+    _, val = line.gsub('(', '').gsub(')', '').split('#')
 
-map = Skim.read
-start_node = SearchNode.new(map, 0, 0)
-end_node = SearchNode.new(map, map.width - 1, map.height - 1)
-cost, path = Search::a_star(start_node, end_node)
+    val = val.chars
+    dir = val.pop
+    dist = val.join.to_i(16)
 
-vis = Skim.new(map.width, map.height, '.')
-path.each do |node|
-  vis[node.x, node.y] = '#'
+    boundry_points += dist
+    x, y = points.last
+
+    points << [x + dist, y] if dir == '0'
+    points << [x, y + dist] if dir == '1'
+    points << [x - dist, y] if dir == '2'
+    points << [x, y - dist] if dir == '3'
+  end
+
+  sum = 0
+  points.each_with_index do |(x1, y1), id|
+    break if id == points.count - 2
+    next if points[id + 1].nil?
+
+    x2, y2 = points[id + 1]
+    sum += (y1 + y2) * (x1 - x2)
+  end
+
+  (sum / 2) - (boundry_points / 2) + 1 + boundry_points
 end
-vis.print
-puts cost
+puts run("day18.txt", nil)
